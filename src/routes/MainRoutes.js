@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project import
 import Loadable from '../components/Loadable';
 import MainLayout from '../layout/MainLayout'
+import ProtectedRoute from '../utils/ProtectedRoute ';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('../pages/dashboard')));
@@ -15,15 +16,13 @@ const Typography = Loadable(lazy(() => import('../pages/components-overview/Typo
 const Color = Loadable(lazy(() => import('../pages/components-overview/Color')));
 const Shadow = Loadable(lazy(() => import('../pages/components-overview/Shadow')));
 const AntIcons = Loadable(lazy(() => import('../pages/components-overview/AntIcons')));
-import ProtectedRoute from '../utils/ProtectedRoute ';
 
 //render - ContactLens
 const ContactLensRepository = Loadable(lazy(() => import('../pages/ContactLens/ContactLensRepository')));
 
 //render - Customer
-const CustomerOrder = Loadable(lazy(() => import('../pages/Cutomer-Management/CustomerOrder')));
-const DueOrders = Loadable(lazy(() => import('../pages/Cutomer-Management/DueOrders')));
-// import CustomerOrder from 'pages/Cutomer-Management/CustomerOrder';
+const CustomerOrder = Loadable(lazy(() => import('../pages/Customer-Management/CustomerOrder')));
+const DueOrders = Loadable(lazy(() => import('../pages/Customer-Management/DueOrders')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 

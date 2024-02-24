@@ -22,7 +22,14 @@ import IconButton from '@mui/material/IconButton';
 import ScreenSearchDesktopTwoToneIcon from '@mui/icons-material/ScreenSearchDesktopTwoTone';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import FormHelperText from '@mui/material/FormHelperText';
 import Checkbox from '@mui/material/Checkbox';
+import { api_AuthURL, ApiBaseURL, api_UserName, api_Password } from "../../Constant/Constant";
+import axios from "axios";
+import { SaveCustomerOrderDetails } from "../../Services/svcCustomerOrderService";
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
+import Switch from '@mui/material/Switch';
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -54,19 +61,21 @@ function CustomerOrder() {
     const [Title, setTitle] = useState("");
     const [CustomerName, setCustomerName] = useState("");
     const [CustomerAddress, setCustomerAddress] = useState("");
+    const [isExistingCustomer, setisExistingCustomer] = useState(false);
+    const [CustomerOrder, setCustomerOrder] = useState([]);
     const [RLens, setRLens] = useState("");
     const [RLensList, setRLensList] = useState([]);
     const [LLens, setLLens] = useState("");
     const [LLensList, setLLensList] = useState([]);
-    const [DRSPH, setDRSPH] = useState("");
-    const [DRCYL, setDRCYL] = useState("");
-    const [DRAXIS, setDRAXIS] = useState("");
-    const [DRADD, setDRADD] = useState("");
-    const [DLSPH, setDLSPH] = useState("");
-    const [DLCYL, setDLCYL] = useState("");
-    const [DLAXIS, setDLAXIS] = useState("");
-    const [DLADD, setDLADD] = useState("");
-    const [NRSPH, setNRSPH] = useState(DRSPH + DRADD);
+    const [DRSPH, setDRSPH] = useState();
+    const [DRCYL, setDRCYL] = useState();
+    const [DRAXIS, setDRAXIS] = useState();
+    const [DRADD, setDRADD] = useState();
+    const [DLSPH, setDLSPH] = useState();
+    const [DLCYL, setDLCYL] = useState();
+    const [DLAXIS, setDLAXIS] = useState();
+    const [DLADD, setDLADD] = useState();
+    const [NRSPH, setNRSPH] = useState(parseFloat(DRSPH + DRADD));
     const [NRCYL, setNRCYL] = useState("");
     const [NRAXIS, setNRAXIS] = useState("");
     const [NRADD, setNRADD] = useState("");
@@ -82,8 +91,10 @@ function CustomerOrder() {
     const [FrameId, setFrameId] = useState("");
     const [IPD, setIPD] = useState();
     const [isGrinding, setisGrinding] = useState();
-    const [isCustomerFrame, setisCustomerFrame] = useState();
+    const [isCustomerFrame, setisCustomerFrame] = useState(false);
+    const [FrameBarCode, setFrameBarCode] = useState();
     const [FrameDetails, setFrameDetails] = useState("");
+    const [RightLensPrice, setRightLensPrice] = useState();
     const [Price, setPrice] = useState("");
     const [AdvancePaid, setAdvancePaid] = useState(0);
     const [TotalAmount, setTotalAmount] = useState(Price);
@@ -95,6 +106,61 @@ function CustomerOrder() {
             setNRSPH((parseFloat(DRSPH) + parseFloat(value)).toFixed(2));
         }
     }
+
+    const handleSubmitClick = async (event) => {
+        event.preventDefault();
+
+        let CustomerOrderDetails = {
+            PhoneNumber: PhoneNumber,
+            CustomerCode: CustomerCode,
+            Title: Title,
+            CustomerName: CustomerName,
+            CustomerAddress: CustomerAddress,
+            isExistingCustomer: isExistingCustomer,
+            RLens: RLens,
+            LLens: LLens,
+            DRSPH: DRSPH,
+            DRCYL: DRCYL,
+            DRAXIS: DRAXIS,
+            DRADD: DRADD,
+            DLSPH: DLSPH,
+            DLCYL: DLCYL,
+            DLAXIS: DLAXIS,
+            DLADD: DLADD,
+            NRSPH: NRSPH,
+            NRCYL: NRCYL,
+            NRAXIS: NRAXIS,
+            NLSPH: NLSPH,
+            NLCYL: NLCYL,
+            NLAXIS: NLAXIS,
+            IPD: IPD,
+            isGrinding: isGrinding,
+            isCustomerFrame: isCustomerFrame,
+
+
+        }
+
+        const url = ApiBaseURL + api_AuthURL;
+        const param_data = { username: api_UserName, password: api_Password }
+
+        try {
+            const response = await axios.post(url, param_data);
+            SaveCustomerOrderDetails(response.data, CustomerOrderDetails).then(
+                async (res) => {
+                    if (res > 0) {
+
+                    } else {
+
+                    }
+                }
+            )
+        } catch (error) {
+
+        }
+    }
+
+    useEffect(() => {
+    }, [])
 
     return (
         <React.Fragment>
@@ -325,7 +391,10 @@ function CustomerOrder() {
                                         </Grid>
                                         <Grid item xs={6} style={{ display: "flex" }}>
                                             <FormGroup>
-                                                <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="D" />
+                                                <FormControlLabel
+                                                    control={<Checkbox defaultChecked size="small" value={RDCheck}
+                                                        onChange={(event) => setRDCheck(event.target.checked)} />}
+                                                    label="D" />
                                             </FormGroup>
                                             <TextField
                                                 required
@@ -377,7 +446,12 @@ function CustomerOrder() {
                                         </Grid>
                                         <Grid item xs={6} style={{ display: "flex" }}>
                                             <FormGroup>
-                                                <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="D" />
+                                                <FormControlLabel
+                                                    control={<Checkbox defaultChecked size="small"
+                                                        value={LDCheck}
+                                                        onChange={(event) => setLDCheck(event.target.checked)}
+                                                    />}
+                                                    label="D" />
                                             </FormGroup>
                                             <TextField
                                                 required
@@ -422,7 +496,12 @@ function CustomerOrder() {
                                         </Grid>
                                         <Grid item xs={6} style={{ display: "flex" }}>
                                             <FormGroup>
-                                                <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="N" />
+                                                <FormControlLabel
+                                                    control={<Checkbox defaultChecked size="small"
+                                                        value={RNCheck}
+                                                        onChange={(event) => setRNCheck(event.target.checked)}
+                                                    />}
+                                                    label="N" />
                                             </FormGroup>
                                             <TextField
                                                 required
@@ -469,7 +548,11 @@ function CustomerOrder() {
                                         </Grid>
                                         <Grid item xs={6} style={{ display: "flex" }}>
                                             <FormGroup>
-                                                <FormControlLabel control={<Checkbox defaultChecked size="small" />} label="N" />
+                                                <FormControlLabel
+                                                    control={<Checkbox defaultChecked size="small"
+                                                        value={LNCheck}
+                                                        onChange={(event) => setLNCheck(event.target.checked)} />}
+                                                    label="N" />
                                             </FormGroup>
                                             <TextField
                                                 required
@@ -512,12 +595,84 @@ function CustomerOrder() {
                                                 disabled
                                             />
                                         </Grid>
+
+                                        <Grid item xs={3}>
+                                            <TextField
+                                                required
+                                                name="IPD"
+                                                label="IPD"
+                                                fullWidth
+                                                variant="outlined"
+                                                size="small"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <FormGroup sx={{ alignItems: "start" }}>
+                                                <FormControlLabel
+                                                    control={<Checkbox />}
+                                                    label="Grinding"
+                                                    labelPlacement="start"
+                                                    value={isGrinding}
+                                                    onChange={(event) => setisGrinding(event.target.checked)}
+                                                />
+                                            </FormGroup>
+                                        </Grid>
+                                        <Grid item xs={6}></Grid>
+
+                                        <Grid item xs={12}><Divider />
+                                            <Chip label="Frame Details" size="small" />
+                                        </Grid>
+
+                                        <Grid item xs={3}>
+                                            <FormGroup sx={{ alignItems: "start" }}>
+                                                <FormControlLabel
+                                                    control={<Switch />}
+                                                    label="Customer Frame"
+                                                    labelPlacement="start"
+                                                    value={isCustomerFrame}
+                                                    onChange={(event) => setisCustomerFrame(event.target.checked)}
+                                                />
+                                                <FormHelperText>Click to switch customer frame</FormHelperText>
+                                            </FormGroup>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <TextField
+                                                required
+                                                label="Frame BarCode"
+                                                fullWidth
+                                                value={FrameBarCode}
+                                                onChange={(event) => setFrameBarCode(event.target.value)}
+                                                variant="outlined"
+                                                size="small"
+                                                disabled={isCustomerFrame ? true : false}
+                                            >
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                required
+                                                name="Framedetails"
+                                                label="Frame Details"
+                                                fullWidth
+                                                variant="outlined"
+                                                size="small"
+                                                multiline
+                                                rows={2}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12}><Divider />
+                                            <Chip label="Price" size="small" />
+                                        </Grid>
+
                                         <Grid item xs={6}>
                                             <TextField
                                                 required
                                                 name="MRP"
                                                 label="Right Lens Price"
                                                 fullWidth
+                                                value={RightLensPrice}
+                                                onChange={(e) => setRightLensPrice(e.target.value)}
                                                 variant="outlined"
                                                 size="small"
                                             />
@@ -532,60 +687,6 @@ function CustomerOrder() {
                                                 size="small"
                                             />
                                         </Grid>
-                                        <Grid item xs={3}>
-                                            <TextField
-                                                required
-                                                label="Frame BarCode"
-                                                fullWidth
-                                                variant="outlined"
-                                                size="small"
-                                            >
-                                            </TextField>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <FormGroup sx={{ alignItems: "start" }}>
-                                                <FormControlLabel
-                                                    control={<Checkbox />}
-                                                    label="Customer Frame"
-                                                    labelPlacement="start"
-                                                    onChange={(event) => setisCustomerFrame(event.target.value)}
-                                                />
-                                            </FormGroup>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <TextField
-                                                required
-                                                name="CustomerCode"
-                                                label="IPD"
-                                                fullWidth
-                                                variant="outlined"
-                                                size="small"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <FormGroup sx={{ alignItems: "start" }}>
-                                                <FormControlLabel
-                                                    control={<Checkbox />}
-                                                    label="Grinding"
-                                                    labelPlacement="start"
-                                                    onChange={(event) => setisGrinding(event.target.value)}
-                                                />
-                                            </FormGroup>
-                                        </Grid>
-
-                                        <Grid item xs={6}>
-                                            <TextField
-                                                required
-                                                name="Framedetails"
-                                                label="Frame Details"
-                                                fullWidth
-                                                variant="outlined"
-                                                size="small"
-                                                multiline
-                                                rows={2}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={6}></Grid>
                                         <Grid item xs={6}>
                                             <TextField
                                                 required
@@ -594,6 +695,17 @@ function CustomerOrder() {
                                                 fullWidth
                                                 variant="outlined"
                                                 size="small"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6}></Grid>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                name="Discount"
+                                                label="Sum Amount"
+                                                fullWidth
+                                                variant="outlined"
+                                                size="small"
+                                                disabled
                                             />
                                         </Grid>
                                         <Grid item xs={6}></Grid>
@@ -611,7 +723,7 @@ function CustomerOrder() {
                                             <TextField
                                                 required
                                                 name="AdvanceAmount"
-                                                label="Advance Amount"
+                                                label="Advance Pay"
                                                 fullWidth
                                                 variant="outlined"
                                                 size="small"
@@ -622,7 +734,7 @@ function CustomerOrder() {
                                             <TextField
                                                 required
                                                 name="TotalAmount"
-                                                label="Total Amount"
+                                                label="Final Price"
                                                 fullWidth
                                                 variant="outlined"
                                                 size="small"
@@ -637,6 +749,7 @@ function CustomerOrder() {
                                                 fullWidth
                                                 variant="outlined"
                                                 size="small"
+                                                disabled
                                             />
                                         </Grid>
                                     </React.Fragment>
@@ -647,6 +760,7 @@ function CustomerOrder() {
                                     <Button
                                         variant="contained"
                                         style={{ borderRadius: 10, marginRight: "10px" }}
+                                        onClick={handleSubmitClick}
                                     >
                                         Submit
                                     </Button>

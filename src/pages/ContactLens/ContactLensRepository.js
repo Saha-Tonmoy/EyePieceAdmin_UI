@@ -5,7 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-// import { apiBaseUrl, api_AuthURL, api_UserName, api_Password } from 'Constants/Constant';
+import { ApiBaseURL, api_AuthURL, api_UserName, api_Password } from '../../Constant/Constant';
 import axios from 'axios';
 // import { fetchContactLensRepository } from './ContactLensService/svcContactLensService';
 
@@ -19,8 +19,8 @@ function ContactLens() {
     // }, []);
 
     const GetContactLensRepository = async () => {
-        // const url = apiBaseUrl + api_AuthURL;
-        // const param_data = { userName: api_UserName, password: api_Password };
+        const url = ApiBaseURL + api_AuthURL;
+        const param_data = { userName: api_UserName, password: api_Password };
 
         try {
             const response = await axios.post(url, param_data);
