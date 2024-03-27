@@ -22,3 +22,7 @@ export let SaveCustomerOrderDetails = async (token, CustomerOrderDetails) => {
         })
 
 }
+
+export let SaveCustomerDetails = async(token, CustomerDetails) => {
+
+}

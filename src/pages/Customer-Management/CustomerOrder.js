@@ -26,10 +26,12 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Checkbox from '@mui/material/Checkbox';
 import { api_AuthURL, ApiBaseURL, api_UserName, api_Password } from "../../Constant/Constant";
 import axios from "axios";
-import { SaveCustomerOrderDetails } from "../../Services/svcCustomerOrderService";
+import { SaveCustomerOrderDetails, SaveCustomerDetails } from "../../Services/svcCustomerOrderService";
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
+import { AES, enc } from "crypto-js";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -55,6 +57,8 @@ const TitleList = [
 ];
 
 function CustomerOrder() {
+    const [OrderId, setOrderId] = useState("");
+    const [OrderNumber, setOrderNumber] = useState("");
     const [date, setDate] = useState(new Date());
     const [PhoneNumber, setPhoneNumber] = useState("");
     const [CustomerCode, setCustomerCode] = useState("");
@@ -94,11 +98,28 @@ function CustomerOrder() {
     const [isCustomerFrame, setisCustomerFrame] = useState(false);
     const [FrameBarCode, setFrameBarCode] = useState();
     const [FrameDetails, setFrameDetails] = useState("");
+
     const [RightLensPrice, setRightLensPrice] = useState();
-    const [Price, setPrice] = useState("");
-    const [AdvancePaid, setAdvancePaid] = useState(0);
-    const [TotalAmount, setTotalAmount] = useState(Price);
-    const [PendingAmount, setPendingAmount] = useState("");
+    const [LeftLensPrice, setLeftLensPrice] = useState();
+    const [FramePrice, setFramePrice] = useState();
+    const [SumAmount, setSumAmount] = useState();
+    const [Discount, setDiscount] = useState();
+    const [DiscountDDL, setDiscountDDL] = useState([]);
+    const [AdvanceAmount, setAdvanceAmount] = useState(0);
+    const [FinalAmount, setFinalAmount] = useState();
+    const [DueAmount, setDueAmount] = useState("");
+
+    var EmployeeName = AES.decrypt(
+        sessionStorage.getItem("EmployeeName"), "EPKEY"
+    ).toString(enc.Utf8)
+
+    var EmployeeGID = AES.decrypt(
+        sessionStorage.getItem("EmployeeGID"), "EPKEY"
+    ).toString(enc.Utf8)
+
+    var StoreCode = AES.decrypt(
+        sessionStorage.getItem("StoreCode"), "EPKEY"
+    ).toString(enc.Utf8)
 
     const handleRLensADDChange = async (value) => {
         debugger;
@@ -111,12 +132,18 @@ function CustomerOrder() {
         event.preventDefault();
 
         let CustomerOrderDetails = {
+            OrderId: OrderId,
+            StoreCode: StoreCode,
             PhoneNumber: PhoneNumber,
             CustomerCode: CustomerCode,
             Title: Title,
             CustomerName: CustomerName,
             CustomerAddress: CustomerAddress,
             isExistingCustomer: isExistingCustomer,
+            RDCheck: RDCheck,
+            RNCheck: RNCheck,
+            LDCheck: LDCheck,
+            LNCheck: LNCheck,
             RLens: RLens,
             LLens: LLens,
             DRSPH: DRSPH,
@@ -134,9 +161,18 @@ function CustomerOrder() {
             NLCYL: NLCYL,
             NLAXIS: NLAXIS,
             IPD: IPD,
-            isGrinding: isGrinding,
-            isCustomerFrame: isCustomerFrame,
-
+            IsGrinding: isGrinding,
+            IsCustomerFrame: isCustomerFrame,
+            FrameBarCode: FrameBarCode,
+            FrameDetails: FrameDetails,
+            RightLensPrice: RightLensPrice,
+            LeftLensPrice: LeftLensPrice,
+            FramePrice: FramePrice,
+            Discount: Discount,
+            AdvanceAmount: AdvanceAmount,
+            FinalAmount: FinalAmount,
+            DueAmount: DueAmount,
+            CreatedBy: EmployeeGID
 
         }
 
@@ -159,6 +195,38 @@ function CustomerOrder() {
         }
     }
 
+    const handleAddNewCustomer = async (event) => {
+        event.preventDefault();
+        if (PhoneNumber != null) {
+            let CustomerDetails = {
+                StoreCode: StoreCode,
+                PhoneNumber: PhoneNumber,
+                Title: Title,
+                CustomerName: CustomerName,
+                CustomerAddress: CustomerAddress,
+                CreatedBy: EmployeeGID
+            }
+
+            const url = ApiBaseURL + api_AuthURL;
+            const param_data = { username: api_UserName, password: api_Password }
+
+            try {
+                const response = await axios.post(url, param_data);
+                SaveCustomerDetails(response.data, CustomerDetails).then(
+                    async (res) => {
+                        if (res > 0) {
+
+                        } else {
+
+                        }
+                    }
+                )
+            } catch (error) {
+
+            }
+        }
+    }
+
     useEffect(() => {
     }, [])
 
@@ -168,10 +236,10 @@ function CustomerOrder() {
                 <Box sx={{ width: '100%', flexGrow: 1 }} >
                     <Grid sx={{ width: "100%" }}>
                         <Stack direction="row" spacing={2}>
-                            <Item sx={{ width: "40%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>Shop Name</b></Item>
+                            <Item sx={{ width: "40%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>{StoreCode}</b></Item>
                             <Item sx={{ width: "20%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>Date: {date.toLocaleDateString()}</b></Item>
-                            <Item sx={{ width: "20%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>Employee Name</b></Item>
-                            <Item sx={{ width: "20%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>Order Number</b></Item>
+                            <Item sx={{ width: "20%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>{EmployeeName}</b></Item>
+                            <Item sx={{ width: "20%", backgroundColor: "#e6f7ff", fontSize: "small" }}><b>{"ODR/25022024/1"}</b></Item>
                         </Stack>
                     </Grid>
                     <Grid sx={{ width: "100%" }} mt={1} style={{ display: "flex" }}>
@@ -259,6 +327,11 @@ function CustomerOrder() {
                                                 multiline
                                                 rows={3}
                                             />
+                                        </Grid>
+                                        <Grid item xs={2} mt={5}>
+                                            <IconButton aria-label="Add New Customer" onClick={handleAddNewCustomer}>
+                                                <PersonAddIcon color="primary" />
+                                            </IconButton>
                                         </Grid>
                                     </React.Fragment>
                                 </Grid>
@@ -363,7 +436,8 @@ function CustomerOrder() {
                                                 fullWidth
                                                 size="small"
                                                 value={RLens}
-                                            // helperText="Please select your currency"
+                                                onChange={(event) => setRLens(event.target.value)}
+                                                error={RLens ? false : true}
                                             >
                                                 {RLensList.map((option) => (
                                                     <MenuItem key={option.value} value={option.value}>
@@ -380,6 +454,7 @@ function CustomerOrder() {
                                                 fullWidth
                                                 size="small"
                                                 value={LLens}
+                                                onChange={(event) => setLLens(event.target.value)}
                                             // helperText="Please select your currency"
                                             >
                                                 {LLensList.map((option) => (
@@ -406,6 +481,7 @@ function CustomerOrder() {
                                                 variant="outlined"
                                                 size="small"
                                                 type="number"
+                                                disabled={RLens ? false : true}
                                             />
                                             <TextField
                                                 required
@@ -418,6 +494,7 @@ function CustomerOrder() {
                                                 size="small"
                                                 sx={{ marginLeft: "2px" }}
                                                 type="number"
+                                                disabled={RLens ? false : true}
                                             />
                                             <TextField
                                                 required
@@ -430,6 +507,7 @@ function CustomerOrder() {
                                                 size="small"
                                                 sx={{ marginLeft: "2px" }}
                                                 type="number"
+                                                disabled={RLens ? false : true}
                                             />
                                             <TextField
                                                 required
@@ -442,6 +520,7 @@ function CustomerOrder() {
                                                 size="small"
                                                 sx={{ marginLeft: "2px" }}
                                                 type="number"
+                                                disabled={RLens ? false : true}
                                             />
                                         </Grid>
                                         <Grid item xs={6} style={{ display: "flex" }}>
@@ -462,6 +541,7 @@ function CustomerOrder() {
                                                 fullWidth
                                                 variant="outlined"
                                                 size="small"
+                                                disabled={LLens ? false : true}
                                             />
                                             <TextField
                                                 required
@@ -472,6 +552,7 @@ function CustomerOrder() {
                                                 variant="outlined"
                                                 size="small"
                                                 sx={{ marginLeft: "2px" }}
+                                                disabled={LLens ? false : true}
                                             />
                                             <TextField
                                                 required
@@ -482,6 +563,7 @@ function CustomerOrder() {
                                                 variant="outlined"
                                                 size="small"
                                                 sx={{ marginLeft: "2px" }}
+                                                disabled={LLens ? false : true}
                                             />
                                             <TextField
                                                 required
@@ -492,6 +574,7 @@ function CustomerOrder() {
                                                 variant="outlined"
                                                 size="small"
                                                 sx={{ marginLeft: "2px" }}
+                                                disabled={LLens ? false : true}
                                             />
                                         </Grid>
                                         <Grid item xs={6} style={{ display: "flex" }}>
@@ -632,7 +715,7 @@ function CustomerOrder() {
                                                     value={isCustomerFrame}
                                                     onChange={(event) => setisCustomerFrame(event.target.checked)}
                                                 />
-                                                <FormHelperText>Click to switch customer frame</FormHelperText>
+                                                <FormHelperText sx={{ color: "#e66464" }}>Click to switch customer frame</FormHelperText>
                                             </FormGroup>
                                         </Grid>
                                         <Grid item xs={3}>
@@ -668,41 +751,49 @@ function CustomerOrder() {
                                         <Grid item xs={6}>
                                             <TextField
                                                 required
-                                                name="MRP"
+                                                name="RightLensPrice"
                                                 label="Right Lens Price"
                                                 fullWidth
                                                 value={RightLensPrice}
                                                 onChange={(e) => setRightLensPrice(e.target.value)}
                                                 variant="outlined"
                                                 size="small"
+                                                type="number"
                                             />
                                         </Grid>
                                         <Grid item xs={6}>
                                             <TextField
                                                 required
-                                                name="MRP"
+                                                name="LeftLensPrice"
                                                 label="Left Lens Price"
                                                 fullWidth
+                                                value={LeftLensPrice}
+                                                onChange={(e) => setLeftLensPrice(e.target.value)}
                                                 variant="outlined"
                                                 size="small"
+                                                type="number"
                                             />
                                         </Grid>
                                         <Grid item xs={6}>
                                             <TextField
                                                 required
-                                                name="MRP"
+                                                name="FramePrice"
                                                 label="Frame Price"
                                                 fullWidth
+                                                value={FramePrice}
+                                                onChange={(e) => setFramePrice(e.target.value)}
                                                 variant="outlined"
                                                 size="small"
+                                                type="number"
                                             />
                                         </Grid>
                                         <Grid item xs={6}></Grid>
                                         <Grid item xs={6}>
                                             <TextField
-                                                name="Discount"
+                                                name="SumAmount"
                                                 label="Sum Amount"
                                                 fullWidth
+                                                value={SumAmount}
                                                 variant="outlined"
                                                 size="small"
                                                 disabled
@@ -711,12 +802,20 @@ function CustomerOrder() {
                                         <Grid item xs={6}></Grid>
                                         <Grid item xs={6}>
                                             <TextField
+                                                select
                                                 name="Discount"
                                                 label="Discount"
                                                 fullWidth
+                                                value={Discount}
+                                                onChange={(e) => setDiscount(e.target.value)}
                                                 variant="outlined"
                                                 size="small"
                                             />
+                                            {DiscountDDL.map((option) => (
+                                                <MenuItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </MenuItem>
+                                            ))}
                                         </Grid>
                                         <Grid item xs={6}></Grid>
                                         <Grid item xs={6}>
@@ -725,17 +824,22 @@ function CustomerOrder() {
                                                 name="AdvanceAmount"
                                                 label="Advance Pay"
                                                 fullWidth
+                                                value={AdvanceAmount}
+                                                onChange={(e) => setAdvanceAmount(e.target.value)}
                                                 variant="outlined"
                                                 size="small"
+                                                type="number"
+                                                shrink={AdvanceAmount ? true : false}
                                             />
                                         </Grid>
                                         <Grid item xs={6}></Grid>
                                         <Grid item xs={6}>
                                             <TextField
                                                 required
-                                                name="TotalAmount"
+                                                name="FinalAmount"
                                                 label="Final Price"
                                                 fullWidth
+                                                value={FinalAmount}
                                                 variant="outlined"
                                                 size="small"
                                                 disabled
@@ -747,6 +851,7 @@ function CustomerOrder() {
                                                 name="DueAmount"
                                                 label="Due Amount"
                                                 fullWidth
+                                                value={DueAmount}
                                                 variant="outlined"
                                                 size="small"
                                                 disabled

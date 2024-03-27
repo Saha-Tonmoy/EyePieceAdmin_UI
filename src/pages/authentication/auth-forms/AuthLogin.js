@@ -68,6 +68,7 @@ const AuthLogin = () => {
         fetchUserDetails(response, UserGID, UserPassword).then((res) => {
           debugger;
           if (res != null) {
+            debugger;
             dispatch(
               login({
                 EmployeeName: res.employeeName,
@@ -78,9 +79,11 @@ const AuthLogin = () => {
 
             const encryptedName = AES.encrypt(res.employeeName, "EPKEY");
             const encryptedGID = AES.encrypt(res.empGID, "EPKEY");
+            const encryptedStoreCode = AES.encrypt(res.storeCode, "EPKEY");
 
             sessionStorage.setItem("EmployeeName", encryptedName.toString());
             sessionStorage.setItem("EmployeeGID", encryptedGID.toString());
+            sessionStorage.setItem("StoreCode", encryptedStoreCode.toString());
             sessionStorage.setItem("user-token", "EyePiece");
 
             setTimeout(() => {
